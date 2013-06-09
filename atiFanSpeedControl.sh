@@ -25,7 +25,7 @@ aticonfig --pplib-cmd "set fanspeed 0 $1"
 
 function check1 {
 echo -e "Step 1:
-Trying to get your GPU temp..."
+Trying to get your GPU temp with aticonfig..."
 getFullOutputTemp
 echo -e "\nParsing aticonfig output to get the temperature...
 Your GPU temperature is $(getTemp) degrees Celsius. Is this correct? Please pay attention as the script relies on getting the correct GPU temperature. If anything looks suspicious, you should quit now.\n"
@@ -46,7 +46,7 @@ done
 
 function check2 {
 echo -e "\nStep 2:
-Trying to get your GPU fan speed...\n"
+Trying to get your GPU fan speed with aticonfig...\n"
 getFullOutputFanSpeed
 echo -e "Parsing aticonfig output to get the fan speed...
 Your GPU fan speed is $(getFanSpeed)%. Is this correct?\n"
@@ -93,9 +93,15 @@ done
 }
 
 function check {
-check1
-check2
-check3
+if [ ! -f $configFile ] ; then
+	echo "Config file $configFile not found. The script must be run for the first time. Commencing initial checks..."
+	
+	check1
+	check2
+	check3
+
+	echo "All checks are complete."
+fi
 }
 
 cd ~/
@@ -112,7 +118,7 @@ else
 	echo tempStep2=50 >> $configFile 
 	echo fanStep2=30 >> $configFile 
 	echo tempStep3=60 >> $configFile 
-	echo fanStep3=50 >> $configFile 
+	echo fanStep3=40 >> $configFile 
 	echo tempStep4=65 >> $configFile 
 	echo fanStep4=60 >> $configFile 
 	echo tempStep5=70 >> $configFile 
@@ -120,6 +126,11 @@ else
 	echo tempStep6=75 >> $configFile 
 	echo fanStep6=90 >> $configFile 
 	echo checkInterval=10 >> $configFile 
+
+	local verbose=$(getConfig verbose) 
+	if [ "$verbose" -eq 1 ] ; then
+		echo "~/$configFile is generated"
+	fi
 fi
 }
 
@@ -145,6 +156,11 @@ local fanStep6=$(getConfig fanStep6)
 local checkInterval=$(getConfig checkInterval) 
 
 local lastTempMode=0
+local tempMode=0
+
+if [ "$verbose" -eq 1 ] ; then
+	echo "Commencing automatic fan speed control"
+fi
 
 while :
 do
@@ -225,7 +241,6 @@ do
 done
 }
 
-#check
+check
 generateConfig
-#temperatureControl
-
+temperatureControl
