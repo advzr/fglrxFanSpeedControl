@@ -98,4 +98,35 @@ check2
 check3
 }
 
+cd ~/
+configFile=".atiFanSpeedControlConfig"
+
+function generateConfig {
+if [ -e $configFile ] ; then
+	echo '$configFile found. Using existing config.'
+else
+	touch $configFile
+	echo verbose=1 >> $configFile 
+	echo tempStep1=40 >> $configFile 
+	echo fanStep1=20 >> $configFile 
+	echo tempStep2=50 >> $configFile 
+	echo fanStep2=30 >> $configFile 
+	echo tempStep3=60 >> $configFile 
+	echo fanStep3=50 >> $configFile 
+	echo tempStep4=65 >> $configFile 
+	echo fanStep4=60 >> $configFile 
+	echo tempStep5=70 >> $configFile 
+	echo fanStep5=70 >> $configFile 
+	echo tempStep6=75 >> $configFile 
+	echo fanStep6=90 >> $configFile 
+	echo checkInterval=10 >> $configFile 
+fi
+}
+
+function getConfig {
+local result=$(cat $configFile | grep -v '^#' | grep "$1=")
+echo $result
+}
+
 check
+generateConfig
