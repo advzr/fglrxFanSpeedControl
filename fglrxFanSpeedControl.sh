@@ -105,7 +105,7 @@ fi
 }
 
 cd ~/
-configFile=".atiFanSpeedControlConfig"
+configFile=".fglrxFanSpeedControlConfig"
 
 function generateConfig {
 if [ -f $configFile ] ; then

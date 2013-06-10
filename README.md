@@ -31,7 +31,7 @@ Q: Does it support CrossFireX?
 A: The short answer is no. The long answer is the following. Now the script only controls the first GPU. Technically it can be possible to rewrite the script and make it control other GPUs too or launch separate instances of the script for each GPU. But I don't have CrossFireX available and if you really want me to make the script support CrossFireX, I will need a lot of your help in testing.
 
 Q: Can I configure the script behavior?
-A: Yes! After the first launch the script will create .atiFanSpeedControlConfig file in your home directory with the following contents:
+A: Yes! After the first launch the script will create .fglrxFanSpeedControlConfig file in your home directory with the following contents:
 
 verbose=1
 checkInterval=10
@@ -41,7 +41,7 @@ constant=-5
 
 verbose=1 makes the script show more output during its work. It may be usefull in order to understand how it works. If you don't want that much output, you can change it to "verbose=0".
 
-checkInterval=10 means that the script will check the GPU temperature every 10 seconds. Change it to whatever you like. However too small check interval will cause the fan speed change too often and that can be annoying.
+checkInterval=10 means that the script will check the GPU temperature every 10 seconds. Change it to whatever you like.
 
 The fan speed is calculated in per cents using a parabolic function. The formula is as follows:
 $currentTemp * $currentTemp * $coefficient / 1000 + $constant
