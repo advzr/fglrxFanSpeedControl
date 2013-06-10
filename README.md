@@ -34,25 +34,20 @@ Q: Can I configure the script behavior?
 A: Yes! After the first launch the script will create .atiFanSpeedControlConfig file in your home directory with the following contents:
 
 verbose=1
-tempStep1=40
-fanStep1=20
-tempStep2=50
-fanStep2=30
-tempStep3=60
-fanStep3=40
-tempStep4=65
-fanStep4=60
-tempStep5=70
-fanStep5=70
-tempStep6=75
-fanStep6=90
 checkInterval=10
+coefficient=20
+constant=-5
+
 
 verbose=1 makes the script show more output during its work. It may be usefull in order to understand how it works. If you don't want that much output, you can change it to "verbose=0".
 
 checkInterval=10 means that the script will check the GPU temperature every 10 seconds. Change it to whatever you like. However too small check interval will cause the fan speed change too often and that can be annoying.
 
-tempStepN and fanStepN are the main options to control the fan speed. Currently the script supports 6 steps. tempStep equals to the temperature in Celsius below which the corresponding fanStep will work. For example tempStep1=40 and fanStep1=20 mean that if the GPU temperature is below 40 degrees the fan speed will be 20%. tempStep2=50 and fanStep2=30 mean that if the temperature is above tempStep1 but below tempStep2 the fan speed will be fanStep2 and so on. If the temperature gets over tempStep6 then fan will work at maximum speed.
+The fan speed is calculated in per cents using a parabolic function. The formula is as follows:
+$currentTemp * $currentTemp * $coefficient / 1000 + $constant
+That means that if for example the current temperature is 60 degrees Celsius and the $coefficient and $constant are default values then the calculated fan speed will be
+60*60*20/1000 - 5 = 67%
+You can change the slope and height of the fan speed graph by changing coefficient and constant in your config. No matter what the calculated speed will never get above 100% as this is useless and it will never get below 20%. This was done as a precaution. Even if the script fails to read the GPU temperature, it will never make the fan stop.
 
 Q: How should I use it?
 A: You can add the script to autostart after you make sure that it works as you want it. Or you can run it manually. However when you stop the script the fan speed will not return to auto! It will remain manually set to the last speed the script set it to. The best way to make fglrx control the fan speed automatically again is to remove the script from autostart and restart X server or reboot your computer completely.
