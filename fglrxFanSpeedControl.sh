@@ -126,6 +126,8 @@ else
 	echo tempStep6=75 >> $configFile 
 	echo fanStep6=90 >> $configFile 
 	echo checkInterval=10 >> $configFile 
+	echo coefficient=20 >> $configFile 
+	echo constant=0 >> $configFile 
 
 	local verbose=$(getConfig verbose) 
 	if [ "$verbose" -eq 1 ] ; then
@@ -139,7 +141,7 @@ local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//")
 echo $result
 }
 
-function temperatureControl {
+function discreteTemperatureControl {
 local verbose=$(getConfig verbose) 
 local tempStep1=$(getConfig tempStep1) 
 local fanStep1=$(getConfig fanStep1) 
@@ -241,6 +243,41 @@ do
 done
 }
 
+function parabolicTemperatureControl {
+local verbose=$(getConfig verbose) 
+local checkInterval=$(getConfig checkInterval) 
+local coefficient=$(getConfig coefficient) 
+local constant=$(getConfig constant) 
+local lastTemp=0
+
+while :
+do
+	local currentTemp=$(getTemp)
+	local calculatedSpeed=$(($currentTemp * $currentTemp * $coefficient / 1000 + $constant))
+
+	if [ "$calculatedSpeed" -gt 100 ] ; then
+		calculatedSpeed=100
+	fi
+
+	if [ "$calculatedSpeed" -lt 20 ] ; then
+		calculatedSpeed=20
+	fi
+
+	if [ "$currentTemp" -ne "$lastTemp" ] ; then
+		if [ "$verbose" -eq 1 ] ; then
+			echo "GPU Temperature is $currentTemp. Setting fan speed to $calculatedSpeed"
+		fi
+		
+		setFanSpeed $calculatedSpeed
+		lastTemp=$currentTemp
+	fi
+
+	sleep $checkInterval
+done
+
+}
+
 check
 generateConfig
-temperatureControl
+#discreteTemperatureControl
+parabolicTemperatureControl
