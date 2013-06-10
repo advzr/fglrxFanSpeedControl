@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function getTemp {
-temp=$(aticonfig --adapter=0 --od-gettemperature | grep 'Sensor' | sed "s/[^0-9]//g;s/^$/-1/;" | sed "s/[0-9]//")
+temp=$(aticonfig --adapter=0 --od-gettemperature | grep "Sensor" | sed "s/[^0-9]//g;s/^$/-1/;" | sed "s/[0-9]//")
 let "temp /= 100"
 echo $temp
 }
@@ -113,21 +113,9 @@ if [ -f $configFile ] ; then
 else
 	touch $configFile
 	echo verbose=1 >> $configFile 
-	echo tempStep1=40 >> $configFile 
-	echo fanStep1=20 >> $configFile 
-	echo tempStep2=50 >> $configFile 
-	echo fanStep2=30 >> $configFile 
-	echo tempStep3=60 >> $configFile 
-	echo fanStep3=40 >> $configFile 
-	echo tempStep4=65 >> $configFile 
-	echo fanStep4=60 >> $configFile 
-	echo tempStep5=70 >> $configFile 
-	echo fanStep5=70 >> $configFile 
-	echo tempStep6=75 >> $configFile 
-	echo fanStep6=90 >> $configFile 
 	echo checkInterval=10 >> $configFile 
 	echo coefficient=20 >> $configFile 
-	echo constant=0 >> $configFile 
+	echo constant=-5 >> $configFile 
 
 	local verbose=$(getConfig verbose) 
 	if [ "$verbose" -eq 1 ] ; then
@@ -139,108 +127,6 @@ fi
 function getConfig {
 local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//")
 echo $result
-}
-
-function discreteTemperatureControl {
-local verbose=$(getConfig verbose) 
-local tempStep1=$(getConfig tempStep1) 
-local fanStep1=$(getConfig fanStep1) 
-local tempStep2=$(getConfig tempStep2) 
-local fanStep2=$(getConfig fanStep2) 
-local tempStep3=$(getConfig tempStep3) 
-local fanStep3=$(getConfig fanStep3) 
-local tempStep4=$(getConfig tempStep4) 
-local fanStep4=$(getConfig fanStep4) 
-local tempStep5=$(getConfig tempStep5) 
-local fanStep5=$(getConfig fanStep5) 
-local tempStep6=$(getConfig tempStep6) 
-local fanStep6=$(getConfig fanStep6) 
-local checkInterval=$(getConfig checkInterval) 
-
-local lastTempMode=0
-local tempMode=0
-
-if [ "$verbose" -eq 1 ] ; then
-	echo "Commencing automatic fan speed control"
-fi
-
-while :
-do
-	temp=$(getTemp)
-
-	if [ "$temp" -le "$tempStep1" ] ; then
-		tempMode=1
-	elif [ "$temp" -le "$tempStep2" ] ; then
-		tempMode=2
-	elif [ "$temp" -le "$tempStep3" ] ; then
-		tempMode=3
-	elif [ "$temp" -le "$tempStep4" ] ; then
-		tempMode=4
-	elif [ "$temp" -le "$tempStep5" ] ; then
-		tempMode=5
-	elif [ "$temp" -le "$tempStep6" ] ; then
-		tempMode=6
-	else
-		tempMode=7
-	fi
-
-	if [ "$tempMode" -ne "$lastTempMode" ] ; then
-		case $tempMode in
-			1)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep1. Setting fan speed to $fanStep1%."
-				fi
-				setFanSpeed $fanStep1
-				lastTempMode=$tempMode
-				;;
-			2)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep2. Setting fan speed to $fanStep2%."
-				fi
-				setFanSpeed $fanStep2
-				lastTempMode=$tempMode
-				;;
-			3)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep3. Setting fan speed to $fanStep3%."
-				fi
-				setFanSpeed $fanStep3
-				lastTempMode=$tempMode
-				;;
-			4)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep4. Setting fan speed to $fanStep4%."
-				fi
-				setFanSpeed $fanStep4
-				lastTempMode=$tempMode
-				;;
-			5)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep5. Setting fan speed to $fanStep5%."
-				fi
-				setFanSpeed $fanStep5
-				lastTempMode=$tempMode
-				;;
-			6)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is bellow $tempStep6. Setting fan speed to $fanStep6%."
-				fi
-				setFanSpeed $fanStep6
-				lastTempMode=$tempMode
-				;;
-			7)
-				if [ "$verbose" -eq 1 ] ; then
-					echo "GPU Temperature is above $tempStep6. Setting fan speed to max."
-				fi
-				setFanSpeed 100
-				lastTempMode=$tempMode
-				;;
-		esac
-
-	fi
-
-	sleep $checkInterval
-done
 }
 
 function parabolicTemperatureControl {
@@ -279,5 +165,4 @@ done
 
 check
 generateConfig
-#discreteTemperatureControl
 parabolicTemperatureControl
