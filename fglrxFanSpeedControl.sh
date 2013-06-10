@@ -125,7 +125,7 @@ fi
 }
 
 function getConfig {
-local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//")
+local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//" | tr -dc '[0-9, -]')
 echo $result
 }
 
