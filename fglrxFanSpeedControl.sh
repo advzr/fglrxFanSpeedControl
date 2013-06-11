@@ -109,18 +109,19 @@ configFile=".fglrxFanSpeedControlConfig"
 
 function generateConfig {
 if [ -f $configFile ] ; then
-	echo "$configFile found. Using existing config."
+	local verbose=$(getConfig verbose) 
+	if [ "$verbose" -eq 1 ] ; then
+		echo "$configFile found. Using existing config."
+	fi
 else
 	touch $configFile
 	echo verbose=1 >> $configFile 
 	echo checkInterval=10 >> $configFile 
 	echo coefficient=20 >> $configFile 
 	echo constant=-5 >> $configFile 
+	echo shiftConst=-27 >> $configFile 
 
-	local verbose=$(getConfig verbose) 
-	if [ "$verbose" -eq 1 ] ; then
-		echo "~/$configFile is generated"
-	fi
+	echo "~/$configFile is generated"
 fi
 }
 
@@ -134,12 +135,13 @@ local verbose=$(getConfig verbose)
 local checkInterval=$(getConfig checkInterval) 
 local coefficient=$(getConfig coefficient) 
 local constant=$(getConfig constant) 
+local shiftConst=$(getConfig shiftConst) 
 local lastTemp=0
 
 while :
 do
 	local currentTemp=$(getTemp)
-	local calculatedSpeed=$(($currentTemp * $currentTemp * $coefficient / 1000 + $constant))
+	local calculatedSpeed=$((($currentTemp + $shiftConst) * ($currentTemp + $shiftConst) * $coefficient / 1000 + $constant))
 
 	if [ "$calculatedSpeed" -gt 100 ] ; then
 		calculatedSpeed=100
