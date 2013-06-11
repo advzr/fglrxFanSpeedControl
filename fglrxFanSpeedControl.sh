@@ -117,8 +117,8 @@ else
 	touch $configFile
 	echo verbose=1 >> $configFile 
 	echo checkInterval=10 >> $configFile 
-	echo coefficient=20 >> $configFile 
-	echo constant=-5 >> $configFile 
+	echo coefficient=37 >> $configFile 
+	echo constant=0 >> $configFile 
 	echo shiftConst=-27 >> $configFile 
 
 	echo "~/$configFile is generated"
