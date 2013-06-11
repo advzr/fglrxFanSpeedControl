@@ -3,7 +3,7 @@ fglrxFanSpeedControl
 
 A short bash script to control a ATI GPU with fglrx dirver.
 
-Sometimes the automatic fan control in fglrx is not optimal. Some people report the fan working always at maximum speed. And some me included experience the fan speed never get higher than 30% regardless of the GPU temperature. While running the fan at full speed can diminish its life time, using a GPU under heavy load with a slow fan can cause an overheat and break the GPU completely.
+Sometimes the automatic fan control in fglrx is not optimal. Some people me included experience the fan speed never get higher than 33% regardless of the GPU temperature. Using a GPU under heavy load with a slow fan can cause an overheat and break the GPU completely.
 
 A possible solution for this is to manually change the GPU fan speed with the following command:
 
