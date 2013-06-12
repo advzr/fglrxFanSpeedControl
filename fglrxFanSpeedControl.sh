@@ -104,15 +104,57 @@ if [ ! -f $configFile ] ; then
 fi
 }
 
+function getConfig {
+local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//" | tr -dc '[0-9, -]')
+echo $result
+}
+
+function isNumericOrExit {
+local configItemName=$1
+local configItem=$2
+
+if ! [[ "$configItem" =~ ^-?[0-9]+$ ]] ; then
+	exec >&2; echo "parse error: $configItemName Not a number"; exit 1
+else 
+	if [ "$verbose" == 1 ] ; then
+		echo "$configItemName parsed as $configItem"
+	fi
+fi
+}
+
+function checkConfig {
+local verbose=$(getConfig verbose) 
+local checkInterval=$(getConfig checkInterval) 
+local coefficient=$(getConfig coefficient) 
+local constant=$(getConfig constant) 
+local shiftConst=$(getConfig shiftConst) 
+
+if [ "$verbose" == 1 ] ; then
+	echo -e "\nParsing config file...\n"
+fi
+
+isNumericOrExit "verbose" $verbose 
+isNumericOrExit "checkInterval" $checkInterval 
+isNumericOrExit "coefficient" $coefficient 
+isNumericOrExit "constant" $constant 
+isNumericOrExit "shiftConst" $shiftConst 
+
+if [ "$verbose" == 1 ] ; then
+	echo -e "\nConfig file parsed successfully\n"
+fi
+}
+
 cd ~/
 configFile=".fglrxFanSpeedControlConfig"
 
 function generateConfig {
 if [ -f $configFile ] ; then
 	local verbose=$(getConfig verbose) 
-	if [ "$verbose" -eq 1 ] ; then
+	if [ "$verbose" == 1 ] ; then
 		echo "$configFile found. Using existing config."
 	fi
+
+	checkConfig
 else
 	touch $configFile
 	echo verbose=1 >> $configFile 
@@ -123,11 +165,6 @@ else
 
 	echo "~/$configFile is generated"
 fi
-}
-
-function getConfig {
-local result=$(cat $configFile | grep -v '^#' | grep "$1=" | sed "s/$1=//" | tr -dc '[0-9, -]')
-echo $result
 }
 
 function parabolicTemperatureControl {
@@ -152,7 +189,7 @@ do
 	fi
 
 	if [ "$currentTemp" -ne "$lastTemp" ] ; then
-		if [ "$verbose" -eq 1 ] ; then
+		if [ "$verbose" == 1 ] ; then
 			echo "GPU Temperature is $currentTemp. Setting fan speed to $calculatedSpeed"
 		fi
 		
